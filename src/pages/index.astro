@@ -1,0 +1,33 @@
+---
+import { GET } from "./api/randomNumber.ts";
+import { AddCard } from "../components/AddCard";
+---
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="viewport" content="width=device-width" />
+    <meta name="generator" content={Astro.generator} />
+    <title>Astro</title>
+  </head>
+  <body>
+    <h1>Astro</h1>
+    <button>Click me!</button>
+    <p id="random"></p>
+    <AddCard client:only="preact" />
+  </body>
+</html>
+
+<script>
+  document.querySelector("button")?.addEventListener("click", async () => {
+    const p = document.querySelector("p#random");
+    if (!p) return;
+    // const res = GET();
+    const request = await fetch("/api/randomNumber");
+    if (request.ok) {
+      const payload: { greeting: string; rand: number } = await request.json();
+      p.textContent = `Server said: ${payload.greeting}, ${payload.rand}`;
+    }
+  });
+</script>
