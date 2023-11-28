@@ -5,12 +5,10 @@
 export interface _taurus_db_stateRow {
   'schemaVersion': number|bigint;
 }
-export interface cardRow {
-  'cardId': any;
-  'numOwned': number|bigint;
-}
 export interface individualRow {
+  'addedUnixMs': number;
   'cardId': any;
+  'editedUnixMs': number;
   'finish': any;
   'id'?: number|bigint;
   'location': any;

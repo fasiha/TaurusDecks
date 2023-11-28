@@ -12,5 +12,7 @@ create table
     cardId string not null,
     location string not null,
     finish string not null,
-    notes string not null
+    notes string not null,
+    addedUnixMs float not null,
+    editedUnixMs float not null
   );

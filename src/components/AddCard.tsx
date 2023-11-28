@@ -4,6 +4,7 @@ import type { TargetedEvent } from "preact/compat";
 
 import type { PokemonTCG } from "pokemon-tcg-sdk-typescript";
 import { pokemonTcgData } from "./tgcData";
+import { INDIVIDUALS_DB, loadIndividuals } from "./Library";
 
 type Hit = { set: PokemonTCG.Set; card: PokemonTCG.Card };
 
@@ -19,7 +20,6 @@ export const AddCard: FunctionalComponent = () => {
       .find((s) => /^[A-Za-z]+$/.test(s))
       ?.toLowerCase();
     const firstNumber = tokens.find((s) => /^\d+$/.test(s));
-    console.log({ firstAllAlpha, firstNumber });
     if (firstAllAlpha && firstNumber) {
       const nextHits: Hit[] = [];
       for (const set in pokemonTcgData.cards) {
@@ -36,8 +36,17 @@ export const AddCard: FunctionalComponent = () => {
         }
       }
       hits.value = nextHits;
-      console.log(nextHits);
     }
+  }
+
+  async function handleClick(cardId: string) {
+    await fetch("/api/individual/" + cardId, {
+      method: "POST",
+      body: JSON.stringify({ location: "", finish: "", notes: "" }),
+      headers: { "Content-Type": "application/json" },
+    });
+
+    await loadIndividuals();
   }
 
   return (
@@ -46,11 +55,13 @@ export const AddCard: FunctionalComponent = () => {
         <input onInput={handleChange} type="text" value={input} />
       </div>
       <table>
+        <caption>Search results</caption>
         <thead>
           <tr>
             <td>Name</td>
             <td>Text</td>
             <td>Number</td>
+            <td>Add?</td>
           </tr>
         </thead>
         <tbody>
@@ -60,6 +71,9 @@ export const AddCard: FunctionalComponent = () => {
               <td>{hit.card.flavorText}</td>
               <td>
                 {hit.card.number}/{hit.set.total}
+              </td>
+              <td>
+                <button onClick={() => handleClick(hit.card.id)}>Add!</button>
               </td>
             </tr>
           ))}

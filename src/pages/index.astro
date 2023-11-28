@@ -1,6 +1,7 @@
 ---
-import { GET } from "./api/randomNumber.ts";
+import "../styles/global.css";
 import { AddCard } from "../components/AddCard";
+import { Library } from "../components/Library";
 ---
 
 <html lang="en">
@@ -16,6 +17,7 @@ import { AddCard } from "../components/AddCard";
     <button>Click me!</button>
     <p id="random"></p>
     <AddCard client:only="preact" />
+    <Library client:only="preact" />
   </body>
 </html>
 
@@ -23,7 +25,6 @@ import { AddCard } from "../components/AddCard";
   document.querySelector("button")?.addEventListener("click", async () => {
     const p = document.querySelector("p#random");
     if (!p) return;
-    // const res = GET();
     const request = await fetch("/api/randomNumber");
     if (request.ok) {
       const payload: { greeting: string; rand: number } = await request.json();

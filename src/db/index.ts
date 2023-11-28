@@ -25,7 +25,7 @@ db.pragma("journal_mode = WAL");
     `SELECT name FROM sqlite_master WHERE type='table' AND name=?`
   );
   // Is this a Tabito database?
-  const hit = s.get("_tabito_db_state");
+  const hit = s.get("_taurus_db_state");
   if (hit) {
     // Yes. So ensure it's the correct version, else bail; implement up/down
     // migration later
@@ -34,14 +34,20 @@ db.pragma("journal_mode = WAL");
     // nope this is a fresh/clean database. Initialize it with our schema
     db.exec(
       readFileSync(
-        resolve(__dirname, "..", "sql", `db-v${SCHEMA_VERSION_REQUIRED}.sql`),
+        resolve(
+          __dirname,
+          "..",
+          "..",
+          "sql",
+          `db-v${SCHEMA_VERSION_REQUIRED}.sql`
+        ),
         "utf8"
       )
     );
     dbVersionCheck(db);
   }
   function dbVersionCheck(db: Db) {
-    const s = db.prepare(`select schemaVersion from _tabito_db_state`);
+    const s = db.prepare(`select schemaVersion from _taurus_db_state`);
     const dbState = s.get() as Selected<Table._taurus_db_stateRow>;
     if (dbState?.schemaVersion !== SCHEMA_VERSION_REQUIRED) {
       throw new Error("db wrong version: need " + SCHEMA_VERSION_REQUIRED);
@@ -52,16 +58,26 @@ db.pragma("journal_mode = WAL");
 // new card!
 const newCardStatement =
   db.prepare<Table.individualRow>(`insert into individual 
-(cardId, location, finish, notes)
-values ($cardId, $location, $finish, $notes)`);
+(cardId, location, finish, notes, addedUnixMs, editedUnixMs)
+values ($cardId, $location, $finish, $notes, $addedUnixMs, $editedUnixMs)`);
 
 export function newCard(
   cardId: string,
   location: string,
   finish: Finish,
-  notes = ""
+  notes = "",
+  addedUnixMs?: number,
+  editedUnixMs?: number
 ) {
-  newCardStatement.run({ cardId, location, finish, notes });
+  let now = Date.now();
+  return newCardStatement.run({
+    cardId,
+    location,
+    finish,
+    notes,
+    addedUnixMs: addedUnixMs || now,
+    editedUnixMs: editedUnixMs || now,
+  });
 }
 
 // list cards we added with the above!
@@ -72,10 +88,14 @@ export function getAllCards(): Table.individualRow[] {
 }
 
 // get just one card:
-const getIndividualsStatement = db.prepare<Pick<Table.individualRow, "cardId">>(
-  `select * from individual where cardId=$cardId`
+const getIndividualsStatement = db.prepare(
+  `select * from individual where cardId=?`
 );
 
-export function getIndividuals(cardId: string): Table.individualRow[] {
-  return getIndividualsStatement.all({ cardId }) as Table.individualRow[];
+export function getIndividuals(cardIds: string[]): Table.individualRow[] {
+  return db.transaction((cardIds: string[]) =>
+    cardIds.flatMap(
+      (cardId) => getIndividualsStatement.all(cardId) as Table.individualRow[]
+    )
+  )(cardIds);
 }
