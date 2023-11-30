@@ -31,6 +31,7 @@ export const Library: FunctionalComponent = () => {
           <td>Name</td>
           <td>Text</td>
           <td>Number</td>
+          <td>Details</td>
         </tr>
       </thead>
       <tbody>
@@ -50,6 +51,21 @@ export const Library: FunctionalComponent = () => {
                       set
                     }`
                   : ""}
+              </td>
+              <td>
+                <dl>
+                  <dt>Location</dt>
+                  <dd>{card.location}</dd>
+
+                  <dt>Notes</dt>
+                  <dd>{card.notes}</dd>
+
+                  <dt>Condition</dt>
+                  <dd>{card.condition}</dd>
+
+                  <dt>Finish</dt>
+                  <dd>{card.finish}</dd>
+                </dl>
               </td>
             </tr>
           );

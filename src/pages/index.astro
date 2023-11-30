@@ -1,6 +1,6 @@
 ---
 import "../styles/global.css";
-import { AddCard } from "../components/AddCard";
+import { Search } from "../components/Search";
 import { Library } from "../components/Library";
 ---
 
@@ -16,7 +16,7 @@ import { Library } from "../components/Library";
     <h1>Astro</h1>
     <button>Click me!</button>
     <p id="random"></p>
-    <AddCard client:only="preact" />
+    <Search client:only="preact" />
     <Library client:only="preact" />
   </body>
 </html>

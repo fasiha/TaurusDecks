@@ -13,6 +13,7 @@ create table
     location string not null,
     finish string not null,
     notes string not null,
+    condition string not null,
     addedUnixMs float not null,
     editedUnixMs float not null
   );

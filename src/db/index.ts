@@ -5,7 +5,13 @@ import { fileURLToPath } from "url";
 import Database from "better-sqlite3";
 
 import type * as Table from "../interfaces/DbTablesV1";
-import type { Finish, Selected } from "../interfaces";
+import {
+  type Finish,
+  type Selected,
+  type Condition,
+  isFinish,
+  isCondition,
+} from "../interfaces";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -58,22 +64,33 @@ db.pragma("journal_mode = WAL");
 // new card!
 const newCardStatement =
   db.prepare<Table.individualRow>(`insert into individual 
-(cardId, location, finish, notes, addedUnixMs, editedUnixMs)
-values ($cardId, $location, $finish, $notes, $addedUnixMs, $editedUnixMs)`);
+(cardId, location, finish, condition, notes, addedUnixMs, editedUnixMs)
+values ($cardId, $location, $condition, $finish, $notes, $addedUnixMs, $editedUnixMs)`);
 
-export function newCard(
-  cardId: string,
-  location: string,
-  finish: Finish,
+export interface NewCardArgs {
+  cardId: string;
+  location: string;
+  finish: Finish;
+  condition: Condition;
+  notes?: string;
+  addedUnixMs?: number;
+  editedUnixMs?: number;
+}
+export function newCard({
+  cardId,
+  location,
+  finish,
+  condition,
   notes = "",
-  addedUnixMs?: number,
-  editedUnixMs?: number
-) {
+  addedUnixMs,
+  editedUnixMs,
+}: NewCardArgs) {
   let now = Date.now();
   return newCardStatement.run({
     cardId,
     location,
     finish,
+    condition,
     notes,
     addedUnixMs: addedUnixMs || now,
     editedUnixMs: editedUnixMs || now,

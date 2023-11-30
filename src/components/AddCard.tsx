@@ -5,80 +5,120 @@ import type { TargetedEvent } from "preact/compat";
 import type { PokemonTCG } from "pokemon-tcg-sdk-typescript";
 import { pokemonTcgData } from "./tgcData";
 import { INDIVIDUALS_DB, loadIndividuals } from "./Library";
+import type { Hit } from "./types";
+import {
+  FINISHES,
+  type Condition,
+  type Finish,
+  isFinish,
+  CONDITIONS,
+  isCondition,
+} from "../interfaces";
 
-type Hit = { set: PokemonTCG.Set; card: PokemonTCG.Card };
+interface Props {
+  hit: Hit;
+}
 
-export const AddCard: FunctionalComponent = () => {
-  const input = useSignal("");
-  const hits = useSignal<Hit[]>([]);
+export const AddCard: FunctionalComponent<Props> = ({ hit }) => {
+  const details = useSignal<
+    | { location: string; condition: Condition; finish: Finish; notes: string }
+    | undefined
+  >(undefined);
+  const networkError = useSignal("");
 
-  function handleChange(e: TargetedEvent<HTMLInputElement, Event>) {
-    input.value = (e.target as HTMLInputElement).value;
-    const raw = (e.target as HTMLInputElement).value;
-    const tokens = raw.split(/\s+/);
-    const firstAllAlpha = tokens
-      .find((s) => /^[A-Za-z]+$/.test(s))
-      ?.toLowerCase();
-    const firstNumber = tokens.find((s) => /^\d+$/.test(s));
-    if (firstAllAlpha && firstNumber) {
-      const nextHits: Hit[] = [];
-      for (const set in pokemonTcgData.cards) {
-        for (const card of pokemonTcgData.cards[set]) {
-          if (
-            card.number === firstNumber &&
-            card.name.toLowerCase().startsWith(firstAllAlpha)
-          ) {
-            nextHits.push({
-              card,
-              set: pokemonTcgData.sets.find((s) => s.id === set)!,
-            });
-          }
-        }
-      }
-      hits.value = nextHits;
-    }
+  function handleAdd() {
+    networkError.value = "";
+    details.value = {
+      location: "",
+      condition: CONDITIONS[0],
+      finish: FINISHES[0],
+      notes: "",
+    };
   }
 
-  async function handleClick(cardId: string) {
-    await fetch("/api/individual/" + cardId, {
+  function handleInputLocation(e: TargetedEvent<HTMLInputElement>) {
+    if (!details.value) return;
+    details.value.location = e.currentTarget.value;
+  }
+  function handleInputNotes(e: TargetedEvent<HTMLInputElement>) {
+    if (!details.value) return;
+    details.value.notes = e.currentTarget.value;
+  }
+  function handleChangeFinish(e: TargetedEvent<HTMLSelectElement>) {
+    const candidate = e.currentTarget.value;
+    if (!details.value || !isFinish(candidate)) return;
+    details.value.finish = candidate;
+  }
+  function handleChangeCondition(e: TargetedEvent<HTMLSelectElement>) {
+    const candidate = e.currentTarget.value;
+    if (!details.value || !isCondition(candidate)) return;
+    details.value.condition = candidate;
+  }
+
+  async function handleSubmit(e: TargetedEvent<HTMLFormElement>) {
+    e.preventDefault();
+    const response = await fetch("/api/individual/" + hit.card.id, {
       method: "POST",
-      body: JSON.stringify({ location: "", finish: "", notes: "" }),
-      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(details.value),
+      headers: JSON_MIME,
     });
-
-    await loadIndividuals();
+    if (response.ok) {
+      await loadIndividuals();
+    } else {
+      networkError.value = `Network error: ${response.status} ${response.statusText}`;
+    }
+    details.value = undefined;
   }
 
-  return (
-    <div>
-      <div>
-        <input onInput={handleChange} type="text" value={input} />
-      </div>
-      <table>
-        <caption>Search results</caption>
-        <thead>
-          <tr>
-            <td>Name</td>
-            <td>Text</td>
-            <td>Number</td>
-            <td>Add?</td>
-          </tr>
-        </thead>
-        <tbody>
-          {hits.value.map((hit) => (
-            <tr key={hit.card.id}>
-              <td>{hit.card.name}</td>
-              <td>{hit.card.flavorText}</td>
-              <td>
-                {hit.card.number}/{hit.set.total}
-              </td>
-              <td>
-                <button onClick={() => handleClick(hit.card.id)}>Add!</button>
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-    </div>
+  return details.value ? (
+    <form onSubmit={handleSubmit}>
+      <input
+        onInput={handleInputLocation}
+        placeholder="Location"
+        type="text"
+        value={details.value.location}
+      />
+
+      <br />
+
+      <input
+        onInput={handleInputNotes}
+        placeholder="Notes"
+        type="text"
+        value={details.value.notes}
+      />
+
+      <br />
+
+      <select onChange={handleChangeFinish} value={details.value.finish}>
+        {FINISHES.map((x) => (
+          <option key={x} value={x}>
+            {x}
+          </option>
+        ))}
+      </select>
+
+      <br />
+
+      <select onChange={handleChangeCondition} value={details.value.condition}>
+        {CONDITIONS.map((x) => (
+          <option key={x} value={x}>
+            {x}
+          </option>
+        ))}
+      </select>
+
+      <br />
+
+      <button>Submit!</button>
+    </form>
+  ) : networkError.value ? (
+    <>
+      {networkError.value} <button onClick={handleAdd}>Retry?</button>
+    </>
+  ) : (
+    <button onClick={handleAdd}>Add!</button>
   );
 };
+
+const JSON_MIME = { "Content-Type": "application/json" };

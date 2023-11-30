@@ -8,6 +8,7 @@ export interface _taurus_db_stateRow {
 export interface individualRow {
   'addedUnixMs': number;
   'cardId': any;
+  'condition': any;
   'editedUnixMs': number;
   'finish': any;
   'id'?: number|bigint;
