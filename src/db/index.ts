@@ -4,14 +4,13 @@ import path from "path";
 import { fileURLToPath } from "url";
 import Database from "better-sqlite3";
 
-import type * as Table from "../interfaces/DbTablesV1";
 import {
   type Finish,
   type Selected,
   type Condition,
-  isFinish,
-  isCondition,
   type SelectedAll,
+  Tables,
+  type FullRow,
 } from "../interfaces";
 
 const __filename = fileURLToPath(import.meta.url);
@@ -55,7 +54,7 @@ db.pragma("journal_mode = WAL");
   }
   function dbVersionCheck(db: Db) {
     const s = db.prepare(`select schemaVersion from _taurus_db_state`);
-    const dbState = s.get() as Selected<Table._taurus_db_stateRow>;
+    const dbState = s.get() as Selected<Tables._taurus_db_stateRow>;
     if (dbState?.schemaVersion !== SCHEMA_VERSION_REQUIRED) {
       throw new Error("db wrong version: need " + SCHEMA_VERSION_REQUIRED);
     }
@@ -64,10 +63,10 @@ db.pragma("journal_mode = WAL");
 
 // new card!
 const newCardStatement =
-  db.prepare<Table.individualRow>(`insert into individual 
+  db.prepare<Tables.individualRow>(`insert into individual 
 (cardId, location, finish, condition, notes, addedUnixMs, editedUnixMs)
 values ($cardId, $location, $condition, $finish, $notes, $addedUnixMs, $editedUnixMs)`);
-const locationStatement = db.prepare<Table.locationRow>(
+const locationStatement = db.prepare<Tables.locationRow>(
   `insert or ignore into location (location) values ($location)`
 );
 
@@ -106,8 +105,8 @@ export function newCard({
 // list cards we added with the above!
 const getAllCardsStatement = db.prepare(`select * from individual`);
 
-export function getAllCards(): Table.individualRow[] {
-  return getAllCardsStatement.all() as Table.individualRow[];
+export function getAllCards(): Tables.individualRow[] {
+  return getAllCardsStatement.all() as Tables.individualRow[];
 }
 
 // get just one card:
@@ -117,16 +116,23 @@ const getIndividualsStatement = db.prepare(
 
 export function getIndividuals(
   cardIds: string[]
-): SelectedAll<Table.individualRow> {
+): SelectedAll<Tables.individualRow> {
   return db.transaction((cardIds: string[]) =>
     cardIds.flatMap(
       (cardId) =>
-        getIndividualsStatement.all(cardId) as SelectedAll<Table.individualRow>
+        getIndividualsStatement.all(cardId) as SelectedAll<Tables.individualRow>
     )
   )(cardIds);
 }
 
 const getLocationsStatement = db.prepare(`select location from location`);
 export function getLocations() {
-  return getLocationsStatement.all() as Pick<Table.locationRow, "location">[];
+  return getLocationsStatement.all() as Pick<Tables.locationRow, "location">[];
+}
+
+const deleteIndividualStatement = db.prepare<
+  Pick<FullRow<Tables.individualRow>, "id">
+>(`delete from individual where id=$id`);
+export function deleteIndividual(id: number) {
+  return deleteIndividualStatement.run({ id });
 }

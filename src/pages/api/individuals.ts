@@ -21,6 +21,6 @@ export const POST: APIRoute = async ({ request }) => {
 
   return new Response(null, {
     status: 400,
-    statusText: "Not found",
+    statusText: "Bad request",
   });
 };

@@ -1,5 +1,5 @@
 import type { APIRoute } from "astro";
-import { getIndividuals, newCard } from "../../../db";
+import { deleteIndividual, getIndividuals, newCard } from "../../../db";
 import { isFinish, isCondition } from "../../../interfaces";
 
 export const GET: APIRoute = ({ params }) => {
@@ -14,6 +14,17 @@ export const GET: APIRoute = ({ params }) => {
   return new Response(null, {
     status: 404,
     statusText: "Not found",
+  });
+};
+
+export const DELETE: APIRoute = async ({ params, request }) => {
+  const cardId = Number(params.cardId);
+  if (isFinite(cardId)) {
+    return new Response(JSON.stringify(deleteIndividual(cardId)));
+  }
+  return new Response(null, {
+    status: 400,
+    statusText: "Bad request",
   });
 };
 
