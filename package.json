@@ -8,7 +8,7 @@
     "build": "astro check && astro build",
     "preview": "astro preview",
     "astro": "astro",
-    "tgc:combine": "node combineTgcData.js",
+    "tcg:combine": "node combineTgcData.js",
     "server:schema": "esbuild sql/makeWrapper.ts --outfile=sql/makeWrapper.cjs --format=cjs && node sql/makeWrapper.cjs"
   },
   "dependencies": {
