@@ -17,7 +17,7 @@
     "@astrojs/preact": "^3.0.1",
     "@preact/signals": "^1.2.2",
     "astro": "^3.6.0",
-    "better-sqlite3": "^9.1.1",
+    "better-sqlite3": "^8.7.0",
     "preact": "^10.6.5",
     "typescript": "^5.3.2"
   },
