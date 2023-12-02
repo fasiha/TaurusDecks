@@ -3,7 +3,7 @@ import { effect, signal, useSignal } from "@preact/signals";
 import type { TargetedEvent } from "preact/compat";
 
 import { pokemonTcgData } from "./tgcData";
-import { INDIVIDUALS_DB, loadIndividuals } from "./Library";
+import { INDIVIDUALS_TABLE, loadData } from "./Library";
 import type { Hit } from "./types";
 import { AddCard } from "./AddCard";
 

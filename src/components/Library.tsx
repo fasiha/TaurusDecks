@@ -7,22 +7,30 @@ import type { SelectedAll } from "../interfaces";
 
 import { pokemonTcgData } from "./tgcData";
 
-export const INDIVIDUALS_DB = signal<SelectedAll<Table.individualRow>>([]);
+export const INDIVIDUALS_TABLE = signal<SelectedAll<Table.individualRow>>([]);
+export const LOCATIONS_TABLE = signal<SelectedAll<Table.locationRow>>([]);
 
-export async function loadIndividuals() {
-  console.log("Running now", new Date().toString());
-  const result = await fetch("/api/individuals");
-  if (result.ok) {
-    const payload = await result.json();
-    INDIVIDUALS_DB.value = payload;
+export async function loadData() {
+  {
+    const resultIndividuals = await fetch("/api/individuals");
+    if (resultIndividuals.ok) {
+      const payload = await resultIndividuals.json();
+      INDIVIDUALS_TABLE.value = payload;
+    }
+  }
+  {
+    const resultLocations = await fetch("/api/locations");
+    if (resultLocations.ok) {
+      const payload = await resultLocations.json();
+      LOCATIONS_TABLE.value = payload;
+    }
   }
 }
 
 // initial
-loadIndividuals();
+loadData();
 
 export const Library: FunctionalComponent = () => {
-  console.log("REREDNDERING", INDIVIDUALS_DB.value);
   return (
     <table>
       <caption>Cards we have</caption>
@@ -35,7 +43,7 @@ export const Library: FunctionalComponent = () => {
         </tr>
       </thead>
       <tbody>
-        {INDIVIDUALS_DB.value.map((card) => {
+        {INDIVIDUALS_TABLE.value.map((card) => {
           const set = card.cardId.split("-")[0];
           const tcg = pokemonTcgData.cards[set].find(
             (item) => item.id === card.cardId

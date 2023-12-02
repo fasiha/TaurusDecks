@@ -4,7 +4,7 @@ import type { TargetedEvent } from "preact/compat";
 
 import type { PokemonTCG } from "pokemon-tcg-sdk-typescript";
 import { pokemonTcgData } from "./tgcData";
-import { INDIVIDUALS_DB, loadIndividuals } from "./Library";
+import { INDIVIDUALS_TABLE, LOCATIONS_TABLE, loadData } from "./Library";
 import type { Hit } from "./types";
 import {
   FINISHES,
@@ -14,10 +14,13 @@ import {
   CONDITIONS,
   isCondition,
 } from "../interfaces";
+import { textMatch } from "../utils/utils";
 
 interface Props {
   hit: Hit;
 }
+
+const TYPE_IN_LOCATION_KEY = "__TyPe_In_LocAtIOn";
 
 export const AddCard: FunctionalComponent<Props> = ({ hit }) => {
   const details = useSignal<
@@ -25,17 +28,34 @@ export const AddCard: FunctionalComponent<Props> = ({ hit }) => {
     | undefined
   >(undefined);
   const networkError = useSignal("");
+  const showLocationTextInput = useSignal(false);
 
   function handleAdd() {
     networkError.value = "";
     details.value = {
-      location: "",
+      location: LOCATIONS_TABLE.value[0]?.location || TYPE_IN_LOCATION_KEY,
       condition: CONDITIONS[0],
       finish: FINISHES[0],
       notes: "",
     };
+    showLocationTextInput.value = LOCATIONS_TABLE.value.length === 0;
+  }
+  function handleCancel() {
+    networkError.value = "";
+    details.value = undefined;
   }
 
+  function handleSelectLocation(e: TargetedEvent<HTMLSelectElement>) {
+    if (!details.value) return;
+    const nextValue = e.currentTarget.value;
+    if (nextValue === TYPE_IN_LOCATION_KEY) {
+      showLocationTextInput.value = true;
+      details.value.location = "";
+    } else {
+      details.value.location = nextValue;
+      showLocationTextInput.value = false;
+    }
+  }
   function handleInputLocation(e: TargetedEvent<HTMLInputElement>) {
     if (!details.value) return;
     details.value.location = e.currentTarget.value;
@@ -57,13 +77,20 @@ export const AddCard: FunctionalComponent<Props> = ({ hit }) => {
 
   async function handleSubmit(e: TargetedEvent<HTMLFormElement>) {
     e.preventDefault();
+    if (!details.value) return; // should never happen
     const response = await fetch("/api/individual/" + hit.card.id, {
       method: "POST",
-      body: JSON.stringify(details.value),
+      body: JSON.stringify({
+        ...details.value,
+        location: textMatch(
+          LOCATIONS_TABLE.value.map((l) => l.location),
+          details.value.location
+        ),
+      }),
       headers: JSON_MIME,
     });
     if (response.ok) {
-      await loadIndividuals();
+      await loadData();
     } else {
       networkError.value = `Network error: ${response.status} ${response.statusText}`;
     }
@@ -72,23 +99,35 @@ export const AddCard: FunctionalComponent<Props> = ({ hit }) => {
 
   return details.value ? (
     <form onSubmit={handleSubmit}>
-      <input
-        onInput={handleInputLocation}
-        placeholder="Location"
-        type="text"
-        value={details.value.location}
-      />
+      <select
+        onChange={handleSelectLocation}
+        value={
+          showLocationTextInput.value
+            ? TYPE_IN_LOCATION_KEY
+            : details.value.location
+        }
+      >
+        <option value={TYPE_IN_LOCATION_KEY}>(enter new location)</option>
+        {LOCATIONS_TABLE.value.map(({ location }) => (
+          <option key={location} value={location}>
+            {location}
+          </option>
+        ))}
+      </select>
 
       <br />
 
-      <input
-        onInput={handleInputNotes}
-        placeholder="Notes"
-        type="text"
-        value={details.value.notes}
-      />
-
-      <br />
+      {showLocationTextInput.value && (
+        <>
+          <input
+            onInput={handleInputLocation}
+            placeholder="Location"
+            type="text"
+            value={details.value.location}
+          />
+          <br />
+        </>
+      )}
 
       <select onChange={handleChangeFinish} value={details.value.finish}>
         {FINISHES.map((x) => (
@@ -110,7 +149,19 @@ export const AddCard: FunctionalComponent<Props> = ({ hit }) => {
 
       <br />
 
+      <input
+        onInput={handleInputNotes}
+        placeholder="Notes"
+        type="text"
+        value={details.value.notes}
+      />
+
+      <br />
+
       <button>Submit!</button>
+      <button onClick={handleCancel} type="button">
+        Cancel
+      </button>
     </form>
   ) : networkError.value ? (
     <>

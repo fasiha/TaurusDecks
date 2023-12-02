@@ -7,11 +7,14 @@ export interface _taurus_db_stateRow {
 }
 export interface individualRow {
   'addedUnixMs': number;
-  'cardId': any;
-  'condition': any;
+  'cardId': string;
+  'condition': string;
   'editedUnixMs': number;
-  'finish': any;
+  'finish': string;
   'id'?: number|bigint;
-  'location': any;
-  'notes': any;
+  'location': string;
+  'notes': string;
+}
+export interface locationRow {
+  'location': string;
 }

@@ -9,11 +9,14 @@ values
 create table
   individual (
     id integer primary key not null,
-    cardId string not null,
-    location string not null,
-    finish string not null,
-    notes string not null,
-    condition string not null,
+    cardId text not null,
+    location text not null,
+    finish text not null,
+    notes text not null,
+    condition text not null,
     addedUnixMs float not null,
     editedUnixMs float not null
   );
+
+create table
+  location (location text not null unique);

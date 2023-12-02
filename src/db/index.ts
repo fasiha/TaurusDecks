@@ -11,6 +11,7 @@ import {
   type Condition,
   isFinish,
   isCondition,
+  type SelectedAll,
 } from "../interfaces";
 
 const __filename = fileURLToPath(import.meta.url);
@@ -66,6 +67,9 @@ const newCardStatement =
   db.prepare<Table.individualRow>(`insert into individual 
 (cardId, location, finish, condition, notes, addedUnixMs, editedUnixMs)
 values ($cardId, $location, $condition, $finish, $notes, $addedUnixMs, $editedUnixMs)`);
+const locationStatement = db.prepare<Table.locationRow>(
+  `insert or ignore into location (location) values ($location)`
+);
 
 export interface NewCardArgs {
   cardId: string;
@@ -86,7 +90,7 @@ export function newCard({
   editedUnixMs,
 }: NewCardArgs) {
   let now = Date.now();
-  return newCardStatement.run({
+  const ret = newCardStatement.run({
     cardId,
     location,
     finish,
@@ -95,6 +99,8 @@ export function newCard({
     addedUnixMs: addedUnixMs || now,
     editedUnixMs: editedUnixMs || now,
   });
+  locationStatement.run({ location });
+  return ret;
 }
 
 // list cards we added with the above!
@@ -115,4 +121,9 @@ export function getIndividuals(cardIds: string[]): Table.individualRow[] {
       (cardId) => getIndividualsStatement.all(cardId) as Table.individualRow[]
     )
   )(cardIds);
+}
+
+const getLocationsStatement = db.prepare(`select location from location`);
+export function getLocations() {
+  return getLocationsStatement.all() as Pick<Table.locationRow, "location">[];
 }
