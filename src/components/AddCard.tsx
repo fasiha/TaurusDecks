@@ -19,6 +19,7 @@ interface Props {
 }
 
 const TYPE_IN_LOCATION_KEY = "__TyPe_In_LocAtIOn";
+let mostRecentLocation: string | undefined = undefined;
 
 export const AddCard: FunctionalComponent<Props> = ({ hit }) => {
   const details = useSignal<
@@ -31,7 +32,7 @@ export const AddCard: FunctionalComponent<Props> = ({ hit }) => {
   function handleAdd() {
     networkError.value = "";
     details.value = {
-      location: LOCATIONS_TABLE.value[0]?.location,
+      location: mostRecentLocation ?? LOCATIONS_TABLE.value[0]?.location,
       condition: CONDITIONS[0],
       finish: FINISHES[0],
       notes: "",
@@ -76,19 +77,21 @@ export const AddCard: FunctionalComponent<Props> = ({ hit }) => {
   async function handleSubmit(e: TargetedEvent<HTMLFormElement>) {
     e.preventDefault();
     if (!details.value) return; // should never happen
+    const cleanedLocation = textMatch(
+      LOCATIONS_TABLE.value.map((l) => l.location),
+      details.value.location
+    );
     const response = await fetch("/api/individual/" + hit.card.id, {
       method: "POST",
       body: JSON.stringify({
         ...details.value,
-        location: textMatch(
-          LOCATIONS_TABLE.value.map((l) => l.location),
-          details.value.location
-        ),
+        location: cleanedLocation,
       }),
       headers: JSON_MIME,
     });
     if (response.ok) {
       await loadData();
+      mostRecentLocation = cleanedLocation;
     } else {
       networkError.value = `Network error: ${response.status} ${response.statusText}`;
     }
