@@ -1,13 +1,24 @@
 /* from https://perfectmotherfuckingwebsite.com */
 
+:root {
+  --font: 24px/1.5 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+    "Helvetica Neue", Arial, "Noto Sans", sans-serif, "Apple Color Emoji",
+    "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+}
+
 body {
   max-width: 1200px;
   margin: 40px auto;
   padding: 0 10px;
-  font: 24px/1.5 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
-    "Helvetica Neue", Arial, "Noto Sans", sans-serif, "Apple Color Emoji",
-    "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+  font: var(--font);
   color: #444;
+}
+
+input,
+button,
+select,
+option {
+  font: var(--font);
 }
 
 h1,

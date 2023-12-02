@@ -31,7 +31,7 @@ export const AddCard: FunctionalComponent<Props> = ({ hit }) => {
   function handleAdd() {
     networkError.value = "";
     details.value = {
-      location: LOCATIONS_TABLE.value[0]?.location || TYPE_IN_LOCATION_KEY,
+      location: LOCATIONS_TABLE.value[0]?.location,
       condition: CONDITIONS[0],
       finish: FINISHES[0],
       notes: "",
