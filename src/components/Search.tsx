@@ -8,6 +8,7 @@ import { AddCard } from "./AddCard";
 import { groupBy } from "../utils/utils";
 import { OwnedSummary } from "./OwnedSummary";
 import type { SelectedAll, Tables } from "../interfaces";
+import { ImageCard } from "./ImageCard";
 
 export const Search: FunctionalComponent = () => {
   const input = useSignal("");
@@ -26,17 +27,17 @@ export const Search: FunctionalComponent = () => {
     const firstNumber = tokens.find((s) => /^\d+$/.test(s));
     if (firstAllAlpha && firstNumber) {
       const nextHits: Hit[] = [];
-      for (const set in pokemonTcgData.cards) {
-        for (const card of pokemonTcgData.cards[set]) {
-          if (
-            card.number === firstNumber &&
-            card.name.toLowerCase().startsWith(firstAllAlpha)
-          ) {
-            nextHits.push({
-              card,
-              set: pokemonTcgData.sets.find((s) => s.id === set)!,
-            });
-          }
+      for (const cardId in pokemonTcgData.cards) {
+        const card = pokemonTcgData.cards[cardId];
+        const set = cardId.split("-")[0];
+        if (
+          card.number === firstNumber &&
+          card.name.toLowerCase().startsWith(firstAllAlpha)
+        ) {
+          nextHits.push({
+            card,
+            set: pokemonTcgData.sets.find((s) => s.id === set)!,
+          });
         }
       }
       hits.value = nextHits;
@@ -72,7 +73,9 @@ export const Search: FunctionalComponent = () => {
         <tbody>
           {hits.value.map((hit) => (
             <tr key={hit.card.id}>
-              <td>{hit.card.name}</td>
+              <td>
+                <ImageCard cardId={hit.card.id} />
+              </td>
               <td>{hit.card.flavorText}</td>
               <td>
                 {hit.card.number}/{hit.set.total}

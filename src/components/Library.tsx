@@ -6,6 +6,7 @@ import type { SelectedAll } from "../interfaces";
 
 import { pokemonTcgData } from "./tgcData";
 import { OwnedSummary } from "./OwnedSummary";
+import { ImageCard } from "./ImageCard";
 
 export const INDIVIDUALS_TABLE = signal<SelectedAll<Table.individualRow>>([]);
 export const LOCATIONS_TABLE = signal<SelectedAll<Table.locationRow>>([]);
@@ -45,12 +46,12 @@ export const Library: FunctionalComponent = () => {
       <tbody>
         {INDIVIDUALS_TABLE.value.map((card) => {
           const set = card.cardId.split("-")[0];
-          const tcg = pokemonTcgData.cards[set].find(
-            (item) => item.id === card.cardId
-          );
+          const tcg = pokemonTcgData.cards[card.cardId];
           return (
             <tr key={card.id}>
-              <td>{tcg?.name}</td>
+              <td>
+                <ImageCard cardId={card.cardId} />
+              </td>
               <td>{tcg?.flavorText}</td>
               <td>
                 {tcg

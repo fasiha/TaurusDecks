@@ -17,7 +17,9 @@ DATA.cards = {};
 const cardsParent = `${DIR}/cards/en`;
 for (const file of readdirSync(cardsParent)) {
   const cardSet = JSON.parse(readFileSync(`${cardsParent}/${file}`));
-  DATA.cards[file.split(".")[0]] = cardSet;
+  for (const card of cardSet) {
+    DATA.cards[card.id] = card;
+  }
 }
 
 writeFileSync("pokemon-tcg-data.json", JSON.stringify(DATA));

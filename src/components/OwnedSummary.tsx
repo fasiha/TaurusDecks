@@ -13,7 +13,7 @@ export const OwnedSummary: FunctionalComponent<Props> = ({
   if (!detailed)
     return (
       <div>
-        ✅ {individual.location}/{individual.condition}/{individual.finish}
+        ✅ {individual.location}, {individual.condition}, {individual.finish}
         {individual.notes ? <> ({individual.notes})</> : ""}
       </div>
     );
