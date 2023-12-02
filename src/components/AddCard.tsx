@@ -160,7 +160,11 @@ export const AddCard: FunctionalComponent<Props> = ({ hit }) => {
       <br />
 
       <button>Submit!</button>
-      <button onClick={handleCancel} type="button">
+      <button
+        style={{ backgroundColor: "red" }}
+        onClick={handleCancel}
+        type="button"
+      >
         Cancel
       </button>
     </form>
