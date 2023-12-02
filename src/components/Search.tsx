@@ -1,6 +1,7 @@
 import type { FunctionalComponent } from "preact";
 import { useSignal } from "@preact/signals";
 import type { TargetedEvent } from "preact/compat";
+import { useRef } from "preact/hooks";
 
 import { pokemonTcgData } from "./tgcData";
 import type { Hit } from "./types";
@@ -16,6 +17,7 @@ export const Search: FunctionalComponent = () => {
   const owned = useSignal<Record<string, SelectedAll<Tables.individualRow>>>(
     {}
   );
+  const inputRef = useRef<HTMLInputElement>(null);
 
   async function handleChange(e: TargetedEvent<HTMLInputElement, Event>) {
     input.value = (e.target as HTMLInputElement).value;
@@ -58,15 +60,18 @@ export const Search: FunctionalComponent = () => {
 
   function handleClear() {
     hits.value = [];
+    input.value = "";
+    inputRef.current?.focus();
   }
 
   return (
     <div>
       <div style={{ display: "flex", columnGap: "1rem" }}>
         <input
-          style={{ flexGrow: 2 }}
           onInput={handleChange}
           placeholder="Pokémon name & number to search"
+          ref={inputRef}
+          style={{ flexGrow: 2 }}
           type="text"
           value={input}
         />
