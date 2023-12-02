@@ -51,13 +51,32 @@ export const Search: FunctionalComponent = () => {
           await response.json();
         owned.value = groupBy(results, (c) => c.cardId);
       }
+    } else {
+      hits.value = [];
     }
+  }
+
+  function handleClear() {
+    hits.value = [];
   }
 
   return (
     <div>
-      <div>
-        <input onInput={handleChange} type="text" value={input} />
+      <div style={{ display: "flex", columnGap: "1rem" }}>
+        <input
+          style={{ flexGrow: 2 }}
+          onInput={handleChange}
+          placeholder="Pokémon name & number to search"
+          type="text"
+          value={input}
+        />
+        <button
+          style={{ flexGrow: 0 }}
+          disabled={!input.value}
+          onClick={handleClear}
+        >
+          Clear
+        </button>
       </div>
       <table>
         <caption>Search results</caption>
