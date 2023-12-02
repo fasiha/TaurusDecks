@@ -24,14 +24,14 @@ export const Search: FunctionalComponent = () => {
     const firstAllAlpha = tokens
       .find((s) => /^[A-Za-z]+$/.test(s))
       ?.toLowerCase();
-    const firstNumber = tokens.find((s) => /^\d+$/.test(s));
+    const firstNumber = tokens.find((s) => /\d+$/.test(s))?.toLowerCase();
     if (firstAllAlpha && firstNumber) {
       const nextHits: Hit[] = [];
       for (const cardId in pokemonTcgData.cards) {
         const card = pokemonTcgData.cards[cardId];
         const set = cardId.split("-")[0];
         if (
-          card.number === firstNumber &&
+          card.number.toLowerCase() === firstNumber &&
           card.name.toLowerCase().startsWith(firstAllAlpha)
         ) {
           nextHits.push({

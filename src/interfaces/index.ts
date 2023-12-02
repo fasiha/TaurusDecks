@@ -6,7 +6,7 @@ export type FullRow<T> = {
 export type Selected<T> = FullRow<T> | undefined;
 export type SelectedAll<T> = FullRow<T>[];
 
-export const FINISHES = ["Normal", "Holo", "Reverse-holo"] as const;
+export const FINISHES = ["Normal", "Holo", "Reverse-holo", "Foil"] as const;
 export const CONDITIONS = [
   "Near-mint",
   "Lightly played",
