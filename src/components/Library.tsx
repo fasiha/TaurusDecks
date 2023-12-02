@@ -1,11 +1,11 @@
 import type { FunctionalComponent } from "preact";
-import { effect, signal, useSignal } from "@preact/signals";
-import type { TargetedEvent } from "preact/compat";
+import { signal } from "@preact/signals";
 
 import type * as Table from "../interfaces/DbTablesV1";
 import type { SelectedAll } from "../interfaces";
 
 import { pokemonTcgData } from "./tgcData";
+import { OwnedSummary } from "./OwnedSummary";
 
 export const INDIVIDUALS_TABLE = signal<SelectedAll<Table.individualRow>>([]);
 export const LOCATIONS_TABLE = signal<SelectedAll<Table.locationRow>>([]);
@@ -61,19 +61,7 @@ export const Library: FunctionalComponent = () => {
                   : ""}
               </td>
               <td>
-                <dl>
-                  <dt>Location</dt>
-                  <dd>{card.location}</dd>
-
-                  <dt>Notes</dt>
-                  <dd>{card.notes}</dd>
-
-                  <dt>Condition</dt>
-                  <dd>{card.condition}</dd>
-
-                  <dt>Finish</dt>
-                  <dd>{card.finish}</dd>
-                </dl>
+                <OwnedSummary individual={card} />
               </td>
             </tr>
           );

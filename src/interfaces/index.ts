@@ -1,3 +1,5 @@
+export * as Tables from "./DbTablesV1";
+
 export type FullRow<T> = {
   [k in keyof T]-?: NonNullable<T[k]>;
 };

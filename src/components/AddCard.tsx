@@ -1,10 +1,8 @@
 import type { FunctionalComponent } from "preact";
-import { effect, signal, useSignal } from "@preact/signals";
+import { useSignal } from "@preact/signals";
 import type { TargetedEvent } from "preact/compat";
 
-import type { PokemonTCG } from "pokemon-tcg-sdk-typescript";
-import { pokemonTcgData } from "./tgcData";
-import { INDIVIDUALS_TABLE, LOCATIONS_TABLE, loadData } from "./Library";
+import { LOCATIONS_TABLE, loadData } from "./Library";
 import type { Hit } from "./types";
 import {
   FINISHES,

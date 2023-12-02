@@ -115,10 +115,13 @@ const getIndividualsStatement = db.prepare(
   `select * from individual where cardId=?`
 );
 
-export function getIndividuals(cardIds: string[]): Table.individualRow[] {
+export function getIndividuals(
+  cardIds: string[]
+): SelectedAll<Table.individualRow> {
   return db.transaction((cardIds: string[]) =>
     cardIds.flatMap(
-      (cardId) => getIndividualsStatement.all(cardId) as Table.individualRow[]
+      (cardId) =>
+        getIndividualsStatement.all(cardId) as SelectedAll<Table.individualRow>
     )
   )(cardIds);
 }

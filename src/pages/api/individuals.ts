@@ -11,7 +11,7 @@ export const GET: APIRoute = () => {
 
 export const POST: APIRoute = async ({ request }) => {
   const payload = await request.json();
-  if (Array.isArray(payload)) {
+  if (Array.isArray(payload) && payload.every((s) => typeof s === "string")) {
     return new Response(JSON.stringify(getIndividuals(payload)), {
       headers: {
         "Content-Type": "application/json",
@@ -20,7 +20,7 @@ export const POST: APIRoute = async ({ request }) => {
   }
 
   return new Response(null, {
-    status: 404,
+    status: 400,
     statusText: "Not found",
   });
 };

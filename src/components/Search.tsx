@@ -1,17 +1,22 @@
 import type { FunctionalComponent } from "preact";
-import { effect, signal, useSignal } from "@preact/signals";
+import { useSignal } from "@preact/signals";
 import type { TargetedEvent } from "preact/compat";
 
 import { pokemonTcgData } from "./tgcData";
-import { INDIVIDUALS_TABLE, loadData } from "./Library";
 import type { Hit } from "./types";
 import { AddCard } from "./AddCard";
+import { groupBy } from "../utils/utils";
+import { OwnedSummary } from "./OwnedSummary";
+import type { SelectedAll, Tables } from "../interfaces";
 
 export const Search: FunctionalComponent = () => {
   const input = useSignal("");
   const hits = useSignal<Hit[]>([]);
+  const owned = useSignal<Record<string, SelectedAll<Tables.individualRow>>>(
+    {}
+  );
 
-  function handleChange(e: TargetedEvent<HTMLInputElement, Event>) {
+  async function handleChange(e: TargetedEvent<HTMLInputElement, Event>) {
     input.value = (e.target as HTMLInputElement).value;
     const raw = (e.target as HTMLInputElement).value;
     const tokens = raw.split(/\s+/);
@@ -35,6 +40,16 @@ export const Search: FunctionalComponent = () => {
         }
       }
       hits.value = nextHits;
+      const response = await fetch("/api/individuals", {
+        method: "POST",
+        headers: JSON_MIME,
+        body: JSON.stringify(nextHits.map((o) => o.card.id)),
+      });
+      if (response.ok) {
+        const results: SelectedAll<Tables.individualRow> =
+          await response.json();
+        owned.value = groupBy(results, (c) => c.cardId);
+      }
     }
   }
 
@@ -50,6 +65,7 @@ export const Search: FunctionalComponent = () => {
             <td>Name</td>
             <td>Text</td>
             <td>Number</td>
+            <td>Owned</td>
             <td>Add?</td>
           </tr>
         </thead>
@@ -62,6 +78,11 @@ export const Search: FunctionalComponent = () => {
                 {hit.card.number}/{hit.set.total}
               </td>
               <td>
+                {(owned.value[hit.card.id] ?? []).map((card) => (
+                  <OwnedSummary individual={card} />
+                ))}
+              </td>
+              <td>
                 <AddCard hit={hit} />
               </td>
             </tr>
@@ -71,3 +92,5 @@ export const Search: FunctionalComponent = () => {
     </div>
   );
 };
+
+const JSON_MIME = { "Content-Type": "application/json" };
