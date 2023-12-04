@@ -64,13 +64,26 @@ db.pragma("journal_mode = WAL");
 // new card!
 const newCardStatement =
   db.prepare<Tables.individualRow>(`insert into individual 
-(cardId, location, finish, condition, notes, addedUnixMs, editedUnixMs)
+(cardId, location, condition, finish, notes, addedUnixMs, editedUnixMs)
 values ($cardId, $location, $condition, $finish, $notes, $addedUnixMs, $editedUnixMs)`);
 const locationStatement = db.prepare<Tables.locationRow>(
   `insert or ignore into location (location) values ($location)`
 );
+const updateCardStatement = db.prepare<
+  FullRow<Tables.individualRow>
+>(`update individual 
+set
+  cardId=$cardId,
+  location=$location,
+  finish=$finish,
+  condition=$condition,
+  notes=$notes,
+  addedUnixMs=$addedUnixMs,
+  editedUnixMs=$editedUnixMs
+where id=$id`);
 
-export interface NewCardArgs {
+export interface NewUpdateCardArgs {
+  id?: number;
   cardId: string;
   location: string;
   finish: Finish;
@@ -79,7 +92,8 @@ export interface NewCardArgs {
   addedUnixMs?: number;
   editedUnixMs?: number;
 }
-export function newCard({
+export function newUpdateCard({
+  id,
   cardId,
   location,
   finish,
@@ -87,9 +101,9 @@ export function newCard({
   notes = "",
   addedUnixMs,
   editedUnixMs,
-}: NewCardArgs) {
+}: NewUpdateCardArgs) {
   let now = Date.now();
-  const ret = newCardStatement.run({
+  const payload = {
     cardId,
     location,
     finish,
@@ -97,7 +111,11 @@ export function newCard({
     notes,
     addedUnixMs: addedUnixMs || now,
     editedUnixMs: editedUnixMs || now,
-  });
+  };
+  const ret =
+    id !== undefined
+      ? updateCardStatement.run({ ...payload, id })
+      : newCardStatement.run(payload);
   locationStatement.run({ location });
   return ret;
 }

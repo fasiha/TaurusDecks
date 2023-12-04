@@ -13,7 +13,7 @@ export const CONDITIONS = [
   "Moderately played",
   "Heavily played",
   "Damaged",
-];
+] as const;
 
 export type Finish = (typeof FINISHES)[number];
 export type Condition = (typeof CONDITIONS)[number];

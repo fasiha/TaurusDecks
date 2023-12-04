@@ -11,17 +11,25 @@ import {
   isFinish,
   CONDITIONS,
   isCondition,
+  Tables,
 } from "../interfaces";
 import { textMatch } from "../utils/utils";
 
 interface Props {
-  hit: Hit;
+  action?: string;
+  cardId: string;
+  individual?: Tables.individualRow;
 }
 
 const TYPE_IN_LOCATION_KEY = "__TyPe_In_LocAtIOn";
+// Careful! This will be lost when Astro does hot module reloading (even if this is a Signal)
 let mostRecentLocation: string | undefined = undefined;
 
-export const AddCard: FunctionalComponent<Props> = ({ hit }) => {
+export const AddEditCard: FunctionalComponent<Props> = ({
+  cardId,
+  individual,
+  action = "Add!",
+}) => {
   const details = useSignal<
     | { location: string; condition: Condition; finish: Finish; notes: string }
     | undefined
@@ -32,10 +40,13 @@ export const AddCard: FunctionalComponent<Props> = ({ hit }) => {
   function handleAdd() {
     networkError.value = "";
     details.value = {
-      location: mostRecentLocation ?? LOCATIONS_TABLE.value[0]?.location,
-      condition: CONDITIONS[0],
-      finish: FINISHES[0],
-      notes: "",
+      location:
+        individual?.location ??
+        mostRecentLocation ??
+        LOCATIONS_TABLE.value[0]?.location,
+      condition: (individual?.condition as Condition) ?? CONDITIONS[0],
+      finish: (individual?.finish as Finish) ?? FINISHES[0],
+      notes: individual?.notes ?? "",
     };
     showLocationTextInput.value = LOCATIONS_TABLE.value.length === 0;
   }
@@ -74,6 +85,19 @@ export const AddCard: FunctionalComponent<Props> = ({ hit }) => {
     details.value.condition = candidate;
   }
 
+  async function handleDelete() {
+    if (!individual) return;
+    if (!window.confirm("Are you sure you want to delete?")) return;
+    const response = await fetch("/api/individual/" + individual.id, {
+      method: "DELETE",
+    });
+    if (response.ok) {
+      loadData();
+    } else {
+      networkError.value = `Network error while deleting: ${response.status} ${response.statusText}`;
+    }
+    details.value = undefined;
+  }
   async function handleSubmit(e: TargetedEvent<HTMLFormElement>) {
     e.preventDefault();
     if (!details.value) return; // should never happen
@@ -81,13 +105,14 @@ export const AddCard: FunctionalComponent<Props> = ({ hit }) => {
       LOCATIONS_TABLE.value.map((l) => l.location),
       details.value.location
     );
-    const response = await fetch("/api/individual/" + hit.card.id, {
+    const response = await fetch("/api/individual/" + cardId, {
       method: "POST",
       body: JSON.stringify({
         ...details.value,
+        id: individual?.id, // in case of editing
         location: cleanedLocation,
       }),
-      headers: JSON_MIME,
+      headers: { "Content-Type": "application/json" },
     });
     if (response.ok) {
       await loadData();
@@ -161,20 +186,27 @@ export const AddCard: FunctionalComponent<Props> = ({ hit }) => {
 
       <button>Submit!</button>
       <button
-        style={{ backgroundColor: "red" }}
         onClick={handleCancel}
+        style={{ backgroundColor: "orange" }}
         type="button"
       >
         Cancel
       </button>
+      {individual?.id && (
+        <button
+          onClick={handleDelete}
+          style={{ backgroundColor: "red" }}
+          type="button"
+        >
+          Delete
+        </button>
+      )}
     </form>
   ) : networkError.value ? (
     <>
       {networkError.value} <button onClick={handleAdd}>Retry?</button>
     </>
   ) : (
-    <button onClick={handleAdd}>Add!</button>
+    <button onClick={handleAdd}>{action}</button>
   );
 };
-
-const JSON_MIME = { "Content-Type": "application/json" };

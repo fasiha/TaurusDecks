@@ -1,5 +1,5 @@
 import type { APIRoute } from "astro";
-import { deleteIndividual, getIndividuals, newCard } from "../../../db";
+import { deleteIndividual, getIndividuals, newUpdateCard } from "../../../db";
 import { isFinish, isCondition } from "../../../interfaces";
 
 export const GET: APIRoute = ({ params }) => {
@@ -17,10 +17,10 @@ export const GET: APIRoute = ({ params }) => {
   });
 };
 
-export const DELETE: APIRoute = async ({ params, request }) => {
-  const cardId = Number(params.cardId);
-  if (isFinite(cardId)) {
-    return new Response(JSON.stringify(deleteIndividual(cardId)));
+export const DELETE: APIRoute = async ({ params }) => {
+  const id = Number(params.cardId); // even though this is "cardId", it's actually the primary key row `id`
+  if (isFinite(id)) {
+    return new Response(JSON.stringify(deleteIndividual(id)));
   }
   return new Response(null, {
     status: 400,
@@ -32,14 +32,16 @@ export const POST: APIRoute = async ({ params, request }) => {
   const cardId = params.cardId;
   const payload = await request.json();
   if (cardId && payload && typeof payload === "object") {
-    const { location, finish, condition, notes } = payload;
+    const { location, finish, condition, notes, id } = payload;
     if (
       isFinish(finish) &&
       isCondition(condition) &&
       typeof location === "string"
     ) {
       return new Response(
-        JSON.stringify(newCard({ cardId, location, finish, condition, notes })),
+        JSON.stringify(
+          newUpdateCard({ cardId, location, finish, condition, notes, id })
+        ),
         {
           headers: {
             "Content-Type": "application/json",

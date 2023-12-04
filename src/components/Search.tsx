@@ -5,7 +5,7 @@ import { useRef } from "preact/hooks";
 
 import { pokemonTcgData } from "./tgcData";
 import type { Hit } from "./types";
-import { AddCard } from "./AddCard";
+import { AddEditCard } from "./AddEditCard";
 import { groupBy } from "../utils/utils";
 import { OwnedSummary } from "./OwnedSummary";
 import type { SelectedAll, Tables } from "../interfaces";
@@ -110,7 +110,7 @@ export const Search: FunctionalComponent = () => {
                 ))}
               </td>
               <td>
-                <AddCard hit={hit} />
+                <AddEditCard cardId={hit.card.id} />
               </td>
             </tr>
           ))}
