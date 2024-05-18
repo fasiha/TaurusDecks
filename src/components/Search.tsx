@@ -27,13 +27,15 @@ export const Search: FunctionalComponent = () => {
       .find((s) => /^[A-Za-z]+$/.test(s))
       ?.toLowerCase();
     const firstNumber = tokens.find((s) => /\d+$/.test(s))?.toLowerCase();
-    if (firstAllAlpha && firstNumber) {
+    if (firstAllAlpha) {
       const nextHits: Hit[] = [];
       for (const cardId in pokemonTcgData.cards) {
         const card = pokemonTcgData.cards[cardId];
         const set = cardId.split("-")[0];
         if (
-          card.number.toLowerCase() === firstNumber &&
+          (firstNumber === undefined
+            ? true
+            : card.number.toLowerCase().startsWith(firstNumber)) &&
           card.name.toLowerCase().startsWith(firstAllAlpha)
         ) {
           nextHits.push({
