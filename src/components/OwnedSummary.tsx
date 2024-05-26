@@ -13,7 +13,8 @@ export const OwnedSummary: FunctionalComponent<Props> = ({ individual }) => {
     <>
       <div>
         ✅ {individual.location}, {individual.condition}, {individual.finish}
-        {individual.notes ? <> ({individual.notes})</> : ""}
+        {individual.notes ? <> ({individual.notes})</> : ""} (quantity:{" "}
+        {individual.quantity})
       </div>
       <AddEditCard
         action="Edit?"

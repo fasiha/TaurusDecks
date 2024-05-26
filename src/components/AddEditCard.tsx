@@ -31,7 +31,13 @@ export const AddEditCard: FunctionalComponent<Props> = ({
   action = "Add!",
 }) => {
   const details = useSignal<
-    | { location: string; condition: Condition; finish: Finish; notes: string }
+    | {
+        location: string;
+        condition: Condition;
+        finish: Finish;
+        notes: string;
+        quantity: number;
+      }
     | undefined
   >(undefined);
   const networkError = useSignal("");
@@ -47,6 +53,7 @@ export const AddEditCard: FunctionalComponent<Props> = ({
       condition: (individual?.condition as Condition) ?? CONDITIONS[0],
       finish: (individual?.finish as Finish) ?? FINISHES[0],
       notes: individual?.notes ?? "",
+      quantity: Number(individual?.quantity),
     };
     showLocationTextInput.value = LOCATIONS_TABLE.value.length === 0;
   }
@@ -83,6 +90,11 @@ export const AddEditCard: FunctionalComponent<Props> = ({
     const candidate = e.currentTarget.value;
     if (!details.value || !isCondition(candidate)) return;
     details.value.condition = candidate;
+  }
+  function handleChangeQuantity(e: TargetedEvent<HTMLInputElement>) {
+    const val = Number(e.currentTarget.value);
+    if (!details.value || !isFinite(val) || val < 0) return;
+    details.value.quantity = val;
   }
 
   async function handleDelete() {
@@ -180,6 +192,15 @@ export const AddEditCard: FunctionalComponent<Props> = ({
         placeholder="Notes"
         type="text"
         value={details.value.notes}
+      />
+
+      <br />
+
+      <input
+        onChange={handleChangeQuantity}
+        type="number"
+        min="0"
+        value={details.value.quantity}
       />
 
       <br />

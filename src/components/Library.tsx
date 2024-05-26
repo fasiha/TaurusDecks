@@ -1,5 +1,5 @@
 import type { FunctionalComponent } from "preact";
-import { signal } from "@preact/signals";
+import { signal, effect } from "@preact/signals";
 
 import type * as Table from "../interfaces/DbTablesV1";
 import type { SelectedAll } from "../interfaces";
@@ -10,6 +10,10 @@ import { ImageCard } from "./ImageCard";
 
 export const INDIVIDUALS_TABLE = signal<SelectedAll<Table.individualRow>>([]);
 export const LOCATIONS_TABLE = signal<SelectedAll<Table.locationRow>>([]);
+
+effect(() => {
+  console.log("Hi", INDIVIDUALS_TABLE.value[0]?.quantity);
+});
 
 export async function loadData() {
   {
@@ -32,17 +36,9 @@ export async function loadData() {
 loadData();
 
 export const Library: FunctionalComponent = () => {
+  console.log("rerendering Library", INDIVIDUALS_TABLE.value[0]);
   return (
     <table>
-      <caption>Cards we have</caption>
-      <thead>
-        <tr>
-          <td>Name</td>
-          <td>Text</td>
-          <td>Number</td>
-          <td>Details</td>
-        </tr>
-      </thead>
       <tbody>
         {INDIVIDUALS_TABLE.value.map((card) => {
           const set = card.cardId.split("-")[0];

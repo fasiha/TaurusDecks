@@ -64,8 +64,8 @@ db.pragma("journal_mode = WAL");
 // new card!
 const newCardStatement =
   db.prepare<Tables.individualRow>(`insert into individual 
-(cardId, location, condition, finish, notes, addedUnixMs, editedUnixMs)
-values ($cardId, $location, $condition, $finish, $notes, $addedUnixMs, $editedUnixMs)`);
+(cardId, location, condition, finish, quantity, notes, addedUnixMs, editedUnixMs)
+values ($cardId, $location, $condition, $finish, $quantity, $notes, $addedUnixMs, $editedUnixMs)`);
 const locationStatement = db.prepare<Tables.locationRow>(
   `insert or ignore into location (location) values ($location)`
 );
@@ -77,6 +77,7 @@ set
   location=$location,
   finish=$finish,
   condition=$condition,
+  quantity=$quantity,
   notes=$notes,
   addedUnixMs=$addedUnixMs,
   editedUnixMs=$editedUnixMs
@@ -88,6 +89,7 @@ export interface NewUpdateCardArgs {
   location: string;
   finish: Finish;
   condition: Condition;
+  quantity?: number;
   notes?: string;
   addedUnixMs?: number;
   editedUnixMs?: number;
@@ -98,6 +100,7 @@ export function newUpdateCard({
   location,
   finish,
   condition,
+  quantity = 1,
   notes = "",
   addedUnixMs,
   editedUnixMs,
@@ -108,6 +111,7 @@ export function newUpdateCard({
     location,
     finish,
     condition,
+    quantity,
     notes,
     addedUnixMs: addedUnixMs || now,
     editedUnixMs: editedUnixMs || now,

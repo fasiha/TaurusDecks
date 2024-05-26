@@ -14,6 +14,7 @@ create table
     finish text not null,
     notes text not null,
     condition text not null,
+    quantity integer not null default 1,
     addedUnixMs float not null,
     editedUnixMs float not null
   );

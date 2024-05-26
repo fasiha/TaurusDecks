@@ -45,6 +45,7 @@ export const Search: FunctionalComponent = () => {
         }
       }
       hits.value = nextHits;
+      console.log("hits", hits.value);
       const response = await fetch("/api/individuals", {
         method: "POST",
         headers: JSON_MIME,
@@ -104,7 +105,8 @@ export const Search: FunctionalComponent = () => {
               </td>
               <td>{hit.card.flavorText}</td>
               <td>
-                {hit.card.number}/{hit.set.total}
+                {hit.card.number}/
+                <a href={`/sets/${hit.set.id}`}>{hit.set.total}</a>
               </td>
               <td>
                 {(owned.value[hit.card.id] ?? []).map((card) => (

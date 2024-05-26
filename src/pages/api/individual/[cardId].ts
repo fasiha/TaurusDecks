@@ -32,7 +32,7 @@ export const POST: APIRoute = async ({ params, request }) => {
   const cardId = params.cardId;
   const payload = await request.json();
   if (cardId && payload && typeof payload === "object") {
-    const { location, finish, condition, notes, id } = payload;
+    const { location, finish, condition, notes, id, quantity = 1 } = payload;
     if (
       isFinish(finish) &&
       isCondition(condition) &&
@@ -40,7 +40,15 @@ export const POST: APIRoute = async ({ params, request }) => {
     ) {
       return new Response(
         JSON.stringify(
-          newUpdateCard({ cardId, location, finish, condition, notes, id })
+          newUpdateCard({
+            cardId,
+            location,
+            finish,
+            condition,
+            notes,
+            id,
+            quantity,
+          })
         ),
         {
           headers: {

@@ -14,6 +14,7 @@ export interface individualRow {
   'id'?: number|bigint;
   'location': string;
   'notes': string;
+  'quantity'?: number|bigint;
 }
 export interface locationRow {
   'location': string;
